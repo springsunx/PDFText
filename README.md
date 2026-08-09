@@ -5,7 +5,7 @@
 ## 特性
 
 - 单文件应用：HTML、CSS、JavaScript 和 OpenAPI 定义通过 `go:embed` 编入二进制
-- WebUI：拖拽上传、页码范围、版面保留、复制和下载
+- WebUI：点击、拖拽或 `Ctrl+V` 粘贴 PDF，支持页码范围、版面保留、复制和下载
 - REST API：`POST /api/v1/extract`
 - MCP：Streamable HTTP 与 stdio 两种传输
 - 安全限制：文件/输出大小、处理超时、路径隔离、Host/Origin 校验

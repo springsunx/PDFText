@@ -26,10 +26,25 @@
     errorBox.textContent = "";
   };
 
+  const isPDF = (file) => file
+    && (file.name.toLowerCase().endsWith(".pdf") || file.type === "application/pdf");
+
+  const pastedPDF = (clipboardData) => {
+    for (const file of Array.from(clipboardData?.files || [])) {
+      if (isPDF(file)) return file;
+    }
+    for (const item of Array.from(clipboardData?.items || [])) {
+      if (item.kind !== "file") continue;
+      const file = item.getAsFile();
+      if (isPDF(file)) return file;
+    }
+    return null;
+  };
+
   const selectFile = (file) => {
     clearError();
     if (!file) return;
-    if (!file.name.toLowerCase().endsWith(".pdf") && file.type !== "application/pdf") {
+    if (!isPDF(file)) {
       showError("请选择 PDF 文件。");
       return;
     }
@@ -59,6 +74,12 @@
     }
   });
   fileInput.addEventListener("change", () => selectFile(fileInput.files[0]));
+  document.addEventListener("paste", (event) => {
+    const file = pastedPDF(event.clipboardData);
+    if (!file) return;
+    event.preventDefault();
+    selectFile(file);
+  });
 
   ["dragenter", "dragover"].forEach((name) => {
     dropzone.addEventListener(name, (event) => {
