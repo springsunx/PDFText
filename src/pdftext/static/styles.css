@@ -234,7 +234,7 @@ footer { display: flex; justify-content: space-between; padding: 25px 0 35px; bo
 
 @media (max-width: 820px) {
   .page-shell { width: min(100% - 24px, 680px); }
-  .top-links a { display: none; }
+  .top-links a:not(.github-link) { display: none; }
   .hero { padding-top: 66px; }
   .workspace { grid-template-columns: 1fr; }
   .workspace-side { border-left: 0; border-top: 1px solid var(--line); }
