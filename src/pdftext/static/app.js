@@ -6,6 +6,10 @@
   const extractButton = $("extract-button");
   const errorBox = $("error-box");
 
+  // Keep the MCP endpoint aligned with the host, scheme and port used to open
+  // the WebUI, including deployments behind a domain name or reverse proxy.
+  $("mcp-url").textContent = new URL("/mcp", window.location.origin).href;
+
   const formatBytes = (bytes) => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
