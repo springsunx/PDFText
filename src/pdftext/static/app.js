@@ -5,6 +5,9 @@
   const fileInput = $("file-input");
   const extractButton = $("extract-button");
   const errorBox = $("error-box");
+  const toast = $("toast");
+  let toastTimer;
+  let copyButtonTimer;
 
   // Keep the MCP endpoint aligned with the host, scheme and port used to open
   // the WebUI, including deployments behind a domain name or reverse proxy.
@@ -24,6 +27,45 @@
   const clearError = () => {
     errorBox.hidden = true;
     errorBox.textContent = "";
+  };
+
+  const showToast = (message, error = false) => {
+    toast.textContent = message;
+    toast.classList.toggle("error", error);
+    toast.classList.add("show");
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => toast.classList.remove("show"), 2200);
+  };
+
+  const copyText = async (text, source) => {
+    if (window.isSecureContext && navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return;
+      } catch {
+        // Fall through when clipboard permission is denied or unavailable.
+      }
+    }
+
+    const activeElement = document.activeElement;
+    const selectionStart = source.selectionStart;
+    const selectionEnd = source.selectionEnd;
+    const scrollTop = source.scrollTop;
+    const scrollLeft = source.scrollLeft;
+    source.focus({ preventScroll: true });
+    source.select();
+    source.setSelectionRange(0, source.value.length);
+
+    let copied = false;
+    try {
+      copied = document.execCommand("copy");
+    } finally {
+      source.setSelectionRange(selectionStart, selectionEnd);
+      source.scrollTop = scrollTop;
+      source.scrollLeft = scrollLeft;
+      activeElement?.focus?.({ preventScroll: true });
+    }
+    if (!copied) throw new Error("copy command was rejected");
   };
 
   const isPDF = (file) => file
@@ -134,10 +176,16 @@
 
   $("copy-button").addEventListener("click", async (event) => {
     if (!state.result) return;
-    await navigator.clipboard.writeText(state.result.text);
     const button = event.currentTarget;
-    button.textContent = "已复制";
-    window.setTimeout(() => { button.textContent = "复制文本"; }, 1400);
+    try {
+      await copyText(state.result.text, $("result-text"));
+      showToast("文本已复制到剪贴板");
+      button.textContent = "已复制 ✓";
+      window.clearTimeout(copyButtonTimer);
+      copyButtonTimer = window.setTimeout(() => { button.textContent = "复制文本"; }, 1600);
+    } catch {
+      showToast("复制失败，请手动选择文本复制", true);
+    }
   });
 
   $("download-button").addEventListener("click", () => {

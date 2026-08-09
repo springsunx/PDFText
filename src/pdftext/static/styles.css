@@ -202,6 +202,9 @@ a { color: inherit; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .error-box { margin-bottom: 14px; padding: 12px 14px; color: #8d2e16; background: #fff0e9; border: 1px solid #f2c4b3; border-radius: 6px; font-size: 13px; }
+.toast { position: fixed; z-index: 100; left: 50%; bottom: 28px; max-width: calc(100% - 32px); padding: 12px 18px; border-radius: 7px; color: white; background: #284f3d; box-shadow: 0 12px 35px rgba(23,33,29,.2); font-size: 13px; font-weight: 650; opacity: 0; visibility: hidden; pointer-events: none; transform: translate(-50%, 12px); transition: opacity .18s ease, transform .18s ease, visibility .18s; }
+.toast.show { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
+.toast.error { background: #8d2e16; }
 .privacy-card { display: flex; gap: 14px; }
 .privacy-icon { display: grid; place-items: center; width: 36px; height: 36px; flex: 0 0 auto; border-radius: 50%; color: var(--green); background: #dce7de; font-size: 22px; }
 .privacy-card strong { font-family: Georgia, serif; font-size: 17px; }
