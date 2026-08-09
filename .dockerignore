@@ -1,0 +1,9 @@
+.git
+.github
+.codebase-memory
+.env
+.gocache
+build
+coverage.out
+tests
+data

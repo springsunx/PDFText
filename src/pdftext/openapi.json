@@ -1,0 +1,85 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "PDFText API",
+    "version": "0.1.0",
+    "description": "Extract UTF-8 text from PDF files."
+  },
+  "paths": {
+    "/healthz": {
+      "get": {
+        "summary": "Liveness check",
+        "responses": {"200": {"description": "Service is running"}}
+      }
+    },
+    "/readyz": {
+      "get": {
+        "summary": "Readiness check",
+        "responses": {
+          "200": {"description": "Poppler is available"},
+          "503": {"description": "Poppler is unavailable"}
+        }
+      }
+    },
+    "/api/v1/info": {
+      "get": {
+        "summary": "Service capabilities and limits",
+        "responses": {"200": {"description": "Service information"}}
+      }
+    },
+    "/api/v1/extract": {
+      "post": {
+        "summary": "Extract text from a PDF",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["file"],
+                "properties": {
+                  "file": {"type": "string", "format": "binary"},
+                  "layout": {"type": "boolean", "default": true},
+                  "page_breaks": {"type": "boolean", "default": true},
+                  "first_page": {"type": "integer", "minimum": 1},
+                  "last_page": {"type": "integer", "minimum": 1},
+                  "password": {"type": "string", "format": "password"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Extracted text",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ExtractionResponse"}
+              }
+            }
+          },
+          "400": {"description": "Invalid PDF or request"},
+          "413": {"description": "PDF exceeds the configured limit"},
+          "422": {"description": "Extraction failed"},
+          "504": {"description": "Extraction timed out"}
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ExtractionResponse": {
+        "type": "object",
+        "required": ["filename", "text", "character_count", "input_bytes", "output_bytes", "elapsed_ms"],
+        "properties": {
+          "filename": {"type": "string"},
+          "text": {"type": "string"},
+          "character_count": {"type": "integer"},
+          "input_bytes": {"type": "integer"},
+          "output_bytes": {"type": "integer"},
+          "elapsed_ms": {"type": "integer"}
+        }
+      }
+    }
+  }
+}

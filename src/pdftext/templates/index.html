@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="本地部署的 PDF 文本提取工具，支持 Web、REST API 和 MCP。" />
+    <title>PDFText · PDF 文本提取</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="PDFText 首页">
+          <span class="brand-mark" aria-hidden="true">P</span>
+          <span>PDFText</span>
+        </a>
+        <nav class="top-links" aria-label="项目链接">
+          <a href="/openapi.json">OpenAPI</a>
+          <a href="#integrations">MCP 接入</a>
+          <span class="status-pill"><i></i> 本地处理</span>
+        </nav>
+      </header>
+
+      <main>
+        <section class="hero">
+          <div class="eyebrow">SELF-HOSTED · PRIVATE · FAST</div>
+          <h1>把 PDF 变成<br /><em>干净的文本。</em></h1>
+          <p>
+            文件只在你的服务中处理。上传 PDF，保留版面或指定页码，
+            然后复制、下载，或通过 REST 与 MCP 接入工作流。
+          </p>
+          <div class="capabilities" aria-label="支持的接口">
+            <span>WebUI</span><span>REST API</span><span>MCP</span><span>Docker</span>
+          </div>
+        </section>
+
+        <section class="workspace" aria-label="PDF 文本提取工作区">
+          <div class="workspace-main">
+            <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="选择或拖入 PDF 文件">
+              <input id="file-input" type="file" accept="application/pdf,.pdf" hidden />
+              <div class="drop-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M7 3.75h7l3 3v13.5H7V3.75Z" />
+                  <path d="M14 3.75v3h3M9.5 13h5M12 10.5v5" />
+                </svg>
+              </div>
+              <div id="empty-file-state">
+                <strong>拖入 PDF 文件</strong>
+                <span>或点击浏览文件</span>
+              </div>
+              <div id="selected-file-state" class="selected-file" hidden>
+                <strong id="file-name"></strong>
+                <span id="file-meta"></span>
+              </div>
+              <small id="file-limit">支持 PDF · 最大 50 MB</small>
+            </div>
+
+            <div class="options-row">
+              <label class="check-option">
+                <input id="layout" type="checkbox" checked />
+                <span class="checkbox-ui"></span>
+                <span><strong>保留版面</strong><small>尽量维持原文列与间距</small></span>
+              </label>
+              <label class="check-option">
+                <input id="page-breaks" type="checkbox" checked />
+                <span class="checkbox-ui"></span>
+                <span><strong>保留分页</strong><small>页面之间插入换页符</small></span>
+              </label>
+            </div>
+
+            <details class="advanced">
+              <summary>高级选项 <span>页码范围与密码</span></summary>
+              <div class="advanced-grid">
+                <label>
+                  <span>起始页</span>
+                  <input id="first-page" type="number" min="1" placeholder="1" />
+                </label>
+                <label>
+                  <span>结束页</span>
+                  <input id="last-page" type="number" min="1" placeholder="全部" />
+                </label>
+                <label class="password-field">
+                  <span>PDF 密码</span>
+                  <input id="password" type="password" autocomplete="off" placeholder="仅加密文件需要" />
+                </label>
+              </div>
+            </details>
+
+            <div id="error-box" class="error-box" role="alert" hidden></div>
+            <button id="extract-button" class="primary-button" type="button" disabled>
+              <span class="button-label">提取文本</span>
+              <span class="button-progress" hidden><i></i> 正在处理…</span>
+            </button>
+          </div>
+
+          <aside class="workspace-side">
+            <div class="privacy-card">
+              <span class="privacy-icon" aria-hidden="true">⌁</span>
+              <div>
+                <strong>你的文件，你的数据</strong>
+                <p>不依赖第三方云服务，适合内网与私有环境部署。</p>
+              </div>
+            </div>
+            <dl class="facts">
+              <div><dt>处理引擎</dt><dd>Poppler</dd></div>
+              <div><dt>输出编码</dt><dd>UTF-8</dd></div>
+              <div><dt>服务状态</dt><dd class="online">可用</dd></div>
+            </dl>
+          </aside>
+        </section>
+
+        <section id="result-panel" class="result-panel" hidden>
+          <div class="result-heading">
+            <div>
+              <span class="section-number">02</span>
+              <h2>提取结果</h2>
+              <p id="result-meta"></p>
+            </div>
+            <div class="result-actions">
+              <button id="copy-button" class="secondary-button" type="button">复制文本</button>
+              <button id="download-button" class="secondary-button" type="button">下载 .txt</button>
+            </div>
+          </div>
+          <textarea id="result-text" readonly spellcheck="false" aria-label="提取的文本"></textarea>
+        </section>
+
+        <section id="integrations" class="integrations">
+          <div class="section-intro">
+            <span class="section-number">03</span>
+            <h2>接入你的工作流</h2>
+            <p>同一个容器，同时提供 REST API 与 MCP Streamable HTTP。</p>
+          </div>
+          <div class="integration-grid">
+            <article>
+              <span class="card-tag">REST</span>
+              <h3>标准 HTTP API</h3>
+              <p>适合服务端、自动化脚本和现有业务系统。</p>
+              <code>POST /api/v1/extract</code>
+              <a href="/openapi.json">查看 OpenAPI 定义 →</a>
+            </article>
+            <article>
+              <span class="card-tag">MCP</span>
+              <h3>模型上下文协议</h3>
+              <p>让支持 MCP 的客户端直接调用 PDF 文本提取工具。</p>
+              <code>http://localhost:8000/mcp</code>
+              <span class="muted-link">Streamable HTTP</span>
+            </article>
+            <article>
+              <span class="card-tag">LOCAL</span>
+              <h3>标准输入输出</h3>
+              <p>桌面 MCP 客户端可直接启动本地服务进程。</p>
+              <code>pdftext mcp</code>
+              <span class="muted-link">stdio transport</span>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <span>PDFText</span>
+        <span>Web · REST · MCP · Docker</span>
+      </footer>
+    </div>
+    <script src="/static/app.js" defer></script>
+  </body>
+</html>
