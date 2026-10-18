@@ -1,4 +1,4 @@
-FROM golang:1.26.5-trixie AS build
+FROM golang:1.27.2-trixie AS build
 
 ARG APP_VERSION=0.1.0
 
